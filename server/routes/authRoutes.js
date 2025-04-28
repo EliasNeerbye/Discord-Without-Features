@@ -23,3 +23,5 @@ router.post("/register", limiter, isAlreadyAuth, register)
 
 
 router.delete("/logout", limiter, logout)
+
+module.exports = router;

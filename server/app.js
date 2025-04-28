@@ -48,8 +48,10 @@ const io = new Server(server, {
 require("./sockets/handler")(io)
 
 // --- Route Imports ---
+const authRoutes = require("./routes/authRoutes");
 
 // --- Routes ---
+app.use("/api/auth", authRoutes);
 
 // --- Server Startup ---
 server.listen(config.PORT, () => {

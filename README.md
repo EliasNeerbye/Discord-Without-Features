@@ -33,7 +33,6 @@
 | HELMET       |           |
 | ARGON2       |           |
 | 0AUTH        |           |
-| TOKEN BEARER |           |
 
 ### **Backend Development - Communication**
 

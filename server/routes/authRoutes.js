@@ -1,3 +1,9 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Authentication
+ *   description: User authentication endpoints
+ */
 const router = require("express").Router();
 const { rateLimit } = require("express-rate-limit");
 
@@ -20,8 +26,6 @@ const logout = require("../controllers/auth/logout")
 
 router.post("/login", limiter, isAlreadyAuth, login)
 router.post("/register", limiter, isAlreadyAuth, register)
-
-
 router.delete("/logout", limiter, logout)
 
 module.exports = router;

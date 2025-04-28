@@ -1,4 +1,3 @@
-// NPM
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -8,15 +7,13 @@ const fileUpload = require("express-fileupload");
 const http = require("http");
 const { Server } = require("socket.io");
 
-// Self Made
+const openapi = require('./util/openapi');
 const logger = require("./util/logger");
 const config = require("./util/config");
 
-// --- Initialize App and Server ---
 const app = express();
 const server = http.createServer(app);
 
-// --- Database Connection ---
 mongoose.connect(config.MONGODB_URI).then(() => {
         logger("Connected to MongoDB", 2);
     }).catch((error) => {
@@ -24,8 +21,7 @@ mongoose.connect(config.MONGODB_URI).then(() => {
         process.exit(1);
     });
 
-// --- Middleware Setup ---
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({
     origin: config.CLIENT_URL,
     credentials: true,
@@ -36,7 +32,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(fileUpload({ useTempFiles: true, tempFileDir: '/tmp/' }));
 
-// --- Socket.IO Setup ---
+app.use('/api-docs', openapi.serve, openapi.setup);
+
 const io = new Server(server, {
     cors: {
         origin: config.CLIENT_URL,
@@ -47,18 +44,15 @@ const io = new Server(server, {
 
 require("./sockets/handler")(io)
 
-// --- Route Imports ---
 const authRoutes = require("./routes/authRoutes");
 
-// --- Routes ---
 app.use("/api/auth", authRoutes);
 
-// --- Server Startup ---
 server.listen(config.PORT, () => {
     logger(`Server is listening on port: ${config.PORT}`, 2);
+    logger(`API Documentation available at http://localhost:${config.PORT}/api-docs`, 2);
 });
 
-// --- Graceful Shutdown ---
 process.on('SIGTERM', () => {
     logger('SIGTERM signal received: closing HTTP server', 2);
     server.close(() => {

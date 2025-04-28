@@ -1,3 +1,49 @@
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: User login
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: User's email address
+ *               username:
+ *                 type: string
+ *                 description: User's username (alternative to email)
+ *               password:
+ *                 type: string
+ *                 description: User's password
+ *             example:
+ *               email: user@example.com
+ *               password: password123
+ *     responses:
+ *       200:
+ *         description: Successfully logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Successfully logged in!
+ *                 error:
+ *                   type: boolean
+ *                   example: false
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Authentication failed
+ *       500:
+ *         description: Server error
+ */
 const validator = require("validator");
 const logger = require("../../util/logger");
 const jwt = require("../../util/jwtHandler");

@@ -1,4 +1,13 @@
-const jwtHandler = require("../../util/jwtHandler");
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     cookieAuth:
+ *       type: apiKey
+ *       in: cookie
+ *       name: token
+ */
+const jwtHandler = require("../util/jwtHandler");
 
 module.exports = (req, res, next) => {
     const token = req.cookies ? req.cookies.token : null;

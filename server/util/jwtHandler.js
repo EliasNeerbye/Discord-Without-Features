@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-
+const logger = require("./logger");
 const config = require("./config");
 
 const DEFAULT_EXPIRY_SECONDS = 7 * 24 * 60 * 60; // 7 Days

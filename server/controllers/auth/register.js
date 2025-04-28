@@ -1,3 +1,54 @@
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address
+ *               username:
+ *                 type: string
+ *                 description: User's username (optional)
+ *               password:
+ *                 type: string
+ *                 description: User's password (minimum 8 characters)
+ *             example:
+ *               email: user@example.com
+ *               username: newuser
+ *               password: password123
+ *     responses:
+ *       201:
+ *         description: User successfully registered
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Successfully registered!
+ *                 error:
+ *                   type: boolean
+ *                   example: false
+ *       400:
+ *         description: Invalid input
+ *       409:
+ *         description: User already exists
+ *       500:
+ *         description: Server error
+ */
 const validator = require("validator");
 const logger = require("../../util/logger");
 const jwt = require("../../util/jwtHandler");

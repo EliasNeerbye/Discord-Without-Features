@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
 const http = require("http");
 const { Server } = require("socket.io");
+const path = require("path");
 
 const openapi = require('./util/openapi');
 const logger = require("./util/logger");
@@ -15,11 +16,11 @@ const app = express();
 const server = http.createServer(app);
 
 mongoose.connect(config.MONGODB_URI).then(() => {
-        logger("Connected to MongoDB", 2);
-    }).catch((error) => {
-        logger(`Error connecting to MongoDB: ${error.message}`, 5);
-        process.exit(1);
-    });
+    logger("Connected to MongoDB", 2);
+}).catch((error) => {
+    logger(`Error connecting to MongoDB: ${error.message}`, 5);
+    process.exit(1);
+});
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({
@@ -32,6 +33,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(fileUpload({ useTempFiles: true, tempFileDir: '/tmp/' }));
 
+// Serve static files
+app.use('/avatars', express.static(path.join(__dirname, 'uploads/avatars')));
+
 app.use('/api-docs', openapi.serve, openapi.setup);
 
 const io = new Server(server, {
@@ -42,11 +46,25 @@ const io = new Server(server, {
     }
 });
 
-require("./sockets/handler")(io)
+// Make io accessible in routes
+app.set('io', io);
 
+require("./sockets/handler")(io);
+
+// Routes
 const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/chats", chatRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    logger(err.message, 5);
+    res.status(500).json({ message: "Something went wrong!", error: true });
+});
 
 server.listen(config.PORT, () => {
     logger(`Server is listening on port: ${config.PORT}`, 2);
@@ -59,7 +77,7 @@ process.on('SIGTERM', () => {
         logger('HTTP server closed', 2);
         mongoose.disconnect().then(() => {
             logger('MongoDB connection closed', 2);
-        process.exit(0);
+            process.exit(0);
         });
     });
 });
@@ -70,7 +88,7 @@ process.on('SIGINT', () => {
         logger('HTTP server closed', 2);
         mongoose.disconnect().then(() => {
             logger('MongoDB connection closed', 2);
-        process.exit(0);
+            process.exit(0);
         });
     });
 });

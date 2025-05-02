@@ -7,10 +7,12 @@ const fileUpload = require("express-fileupload");
 const http = require("http");
 const { Server } = require("socket.io");
 const path = require("path");
+const passport = require("passport");
 
 const openapi = require('./util/openapi');
 const logger = require("./util/logger");
 const config = require("./util/config");
+const setupPassport = require("./util/passportConfig");
 
 console.log(config)
 
@@ -34,6 +36,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(fileUpload({ useTempFiles: true, tempFileDir: '/tmp/' }));
+
+// Initialize Passport
+app.use(passport.initialize());
+setupPassport();
 
 // Serve static files
 app.use('/avatars', express.static(path.join(__dirname, 'uploads/avatars')));

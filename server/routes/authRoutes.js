@@ -6,6 +6,7 @@
  */
 const router = require("express").Router();
 const { rateLimit } = require("express-rate-limit");
+const passport = require("passport");
 
 const limiter = rateLimit({
     windowMs: 5 * 60 * 1000, // 5 Minutes
@@ -31,6 +32,7 @@ const register = require("../controllers/auth/register");
 const logout = require("../controllers/auth/logout");
 const { sendVerificationEmail, verifyEmail } = require("../controllers/auth/verifyEmail");
 const { forgotPassword, resetPassword } = require("../controllers/auth/resetPassword");
+const { googleAuth, googleCallback } = require("../controllers/auth/googleAuth");
 
 router.post("/login", limiter, isAlreadyAuth, login);
 router.post("/register", limiter, isAlreadyAuth, register);
@@ -43,5 +45,9 @@ router.get("/verify-email/:token", verifyEmail);
 // Password reset routes
 router.post("/forgot-password", passwordResetLimiter, forgotPassword);
 router.post("/reset-password", passwordResetLimiter, resetPassword);
+
+// Google OAuth routes
+router.get("/google", limiter, isAlreadyAuth, googleAuth);
+router.get("/google/callback", googleCallback);
 
 module.exports = router;

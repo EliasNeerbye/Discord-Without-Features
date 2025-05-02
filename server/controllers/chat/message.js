@@ -3,6 +3,108 @@ const Chat = require("../../models/Chat");
 const logger = require("../../util/logger");
 const mongoose = require("mongoose");
 
+/**
+ * @swagger
+ * /api/chats/{chatId}/messages:
+ *   post:
+ *     summary: Send a message to a chat
+ *     tags: [Chat]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: chatId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the chat to send message to
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 description: Content of the message
+ *     responses:
+ *       201:
+ *         description: Message sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Message'
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Not a participant in the chat
+ *       404:
+ *         description: Chat not found
+ *       500:
+ *         description: Server error
+ * 
+ *   get:
+ *     summary: Get messages from a chat
+ *     tags: [Chat]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: chatId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the chat to get messages from
+ *       - in: query
+ *         name: before
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Get messages before this timestamp (ISO format)
+ *     responses:
+ *       200:
+ *         description: List of messages with pagination info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 messages:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Message'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: number
+ *                     returned:
+ *                       type: number
+ *                     hasMore:
+ *                       type: boolean
+ *                     oldestTimestamp:
+ *                       type: string
+ *                       format: date-time
+ *                     newestTimestamp:
+ *                       type: string
+ *                       format: date-time
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Not a participant in the chat
+ *       404:
+ *         description: Chat not found
+ *       500:
+ *         description: Server error
+ */
+
 const sendMessage = async (req, res) => {
     try {
         // Get chatId from either the route params or the request body

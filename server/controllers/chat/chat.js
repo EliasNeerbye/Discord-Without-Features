@@ -3,6 +3,111 @@ const User = require("../../models/User");
 const logger = require("../../util/logger");
 const mongoose = require("mongoose");
 
+/**
+ * @swagger
+ * tags:
+ *   name: Chat
+ *   description: Chat management endpoints
+ * 
+ * /api/chats:
+ *   post:
+ *     summary: Create a new chat
+ *     tags: [Chat]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - participants
+ *             properties:
+ *               participants:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of user IDs to include in the chat
+ *               type:
+ *                 type: string
+ *                 enum: [private, group]
+ *                 default: private
+ *               name:
+ *                 type: string
+ *                 description: Name of the group chat (required for group chats)
+ *     responses:
+ *       201:
+ *         description: Chat created successfully
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Not authenticated
+ *       500:
+ *         description: Server error
+ * 
+ *   get:
+ *     summary: Get all chats for the current user
+ *     tags: [Chat]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of chats
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Chat'
+ *       401:
+ *         description: Not authenticated
+ *       500:
+ *         description: Server error
+ * 
+ * /api/chats/{chatId}:
+ *   put:
+ *     summary: Update a group chat
+ *     tags: [Chat]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: chatId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the chat to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: New name for the group chat
+ *               participants:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of user IDs to add to the chat
+ *     responses:
+ *       200:
+ *         description: Chat updated successfully
+ *       400:
+ *         description: Invalid input or not a group chat
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Not an admin of the chat
+ *       404:
+ *         description: Chat not found
+ *       500:
+ *         description: Server error
+ */
+
 const createChat = async (req, res) => {
     try {
         const { participants, type, name } = req.body;

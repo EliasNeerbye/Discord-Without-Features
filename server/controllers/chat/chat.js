@@ -1,119 +1,7 @@
 const Chat = require("../../models/Chat");
 const User = require("../../models/User");
 const logger = require("../../util/logger");
-
-/**
- * @swagger
- * tags:
- *   name: Chats
- *   description: Chat management endpoints
- * 
- * /api/chats:
- *   post:
- *     summary: Create a new chat
- *     tags: [Chats]
- *     security:
- *       - cookieAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - participants
- *             properties:
- *               participants:
- *                 type: array
- *                 items:
- *                   type: string
- *                 description: Array of user IDs to add to the chat
- *               type:
- *                 type: string
- *                 enum: [private, group]
- *                 description: Type of chat (defaults to private)
- *               name:
- *                 type: string
- *                 description: Name of the group chat (required for group chats)
- *     responses:
- *       201:
- *         description: Chat created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Chat'
- *       400:
- *         description: Invalid input
- *       403:
- *         description: Not authorized
- *       500:
- *         description: Server error
- *   get:
- *     summary: Get all chats for current user
- *     tags: [Chats]
- *     security:
- *       - cookieAuth: []
- *     responses:
- *       200:
- *         description: List of chats
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Chat'
- *       403:
- *         description: Not authorized
- *       500:
- *         description: Server error
- */
-
-/**
- * @swagger
- * /api/chats/{chatId}:
- *   put:
- *     summary: Update a group chat
- *     tags: [Chats]
- *     security:
- *       - cookieAuth: []
- *     parameters:
- *       - in: path
- *         name: chatId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID of the chat to update
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: New name for the group chat
- *               participants:
- *                 type: array
- *                 items:
- *                   type: string
- *                 description: Array of user IDs to add to the chat
- *     responses:
- *       200:
- *         description: Chat updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Chat'
- *       400:
- *         description: Invalid input or not a group chat
- *       403:
- *         description: Not authorized or not an admin
- *       404:
- *         description: Chat not found
- *       500:
- *         description: Server error
- */
+const mongoose = require("mongoose");
 
 const createChat = async (req, res) => {
     try {
@@ -124,11 +12,21 @@ const createChat = async (req, res) => {
             return res.status(400).json({ message: "Invalid participants", error: true });
         }
 
-        if (type === "private" && participants.length !== 1) {
+        // Filter out any empty strings and validate each ID is a valid ObjectId
+        const validParticipants = participants.filter(id => {
+            if (!id || id.trim() === '') return false;
+            return mongoose.Types.ObjectId.isValid(id);
+        });
+
+        if (validParticipants.length === 0) {
+            return res.status(400).json({ message: "No valid participants provided", error: true });
+        }
+
+        if (type === "private" && validParticipants.length !== 1) {
             return res.status(400).json({ message: "Private chat must have exactly one participant", error: true });
         }
 
-        const uniqueParticipants = [...new Set([userId, ...participants])];
+        const uniqueParticipants = [...new Set([userId, ...validParticipants])];
         const existingUsers = await User.find({ _id: { $in: uniqueParticipants } });
         
         if (existingUsers.length !== uniqueParticipants.length) {
@@ -181,6 +79,11 @@ const updateChat = async (req, res) => {
         const { name, participants } = req.body;
         const userId = req.user.userId;
 
+        // Validate chatId is a valid ObjectId
+        if (!chatId || !mongoose.Types.ObjectId.isValid(chatId)) {
+            return res.status(400).json({ message: "Invalid chat ID", error: true });
+        }
+
         const chat = await Chat.findById(chatId);
         if (!chat) {
             return res.status(404).json({ message: "Chat not found", error: true });
@@ -198,8 +101,16 @@ const updateChat = async (req, res) => {
             chat.name = name;
         }
 
-        if (participants) {
-            chat.participants = [...new Set([...chat.participants, ...participants])];
+        if (participants && Array.isArray(participants)) {
+            // Filter out any empty strings and validate each ID is a valid ObjectId
+            const validParticipants = participants.filter(id => {
+                if (!id || id.trim() === '') return false;
+                return mongoose.Types.ObjectId.isValid(id);
+            });
+
+            if (validParticipants.length > 0) {
+                chat.participants = [...new Set([...chat.participants, ...validParticipants])];
+            }
         }
 
         await chat.save();

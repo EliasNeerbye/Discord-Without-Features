@@ -1,6 +1,6 @@
 const User = require("../../models/User");
 const logger = require("../../util/logger");
-const { hash: hashPassword } = require("argon2");
+const { hash: hashPassword, verify: verifyPassword } = require("argon2");
 
 const getProfile = async (req, res) => {
     try {
@@ -18,7 +18,12 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
     try {
         const { username, currentPassword, newPassword } = req.body;
-        const user = await User.findById(req.user.userId);
+        // Explicitly include passwordHash in the query
+        const user = await User.findById(req.user.userId).select("+passwordHash");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found", error: true });
+        }
 
         if (username) {
             const existingUser = await User.findOne({ username, _id: { $ne: user._id } });
@@ -32,9 +37,12 @@ const updateProfile = async (req, res) => {
             if (!user.passwordHash) {
                 return res.status(400).json({ message: "Cannot set password for OAuth user", error: true });
             }
+            
             if (newPassword.length < 8) {
                 return res.status(400).json({ message: "Password must be at least 8 characters", error: true });
             }
+            
+            // Verify the current password
             if (await verifyPassword(user.passwordHash, currentPassword)) {
                 user.passwordHash = await hashPassword(newPassword);
             } else {

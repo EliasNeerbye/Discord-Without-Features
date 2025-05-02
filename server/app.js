@@ -54,10 +54,12 @@ const io = new Server(server, {
     }
 });
 
-// Make io accessible in routes
-app.set('io', io);
+// Setup socket handlers and get functions to emit events
+const socketHandler = require("./sockets/handler")(io);
 
-require("./sockets/handler")(io);
+// Make io and socket handlers accessible in routes
+app.set('io', io);
+app.set('socketHandler', socketHandler);
 
 // Routes
 const authRoutes = require("./routes/authRoutes");

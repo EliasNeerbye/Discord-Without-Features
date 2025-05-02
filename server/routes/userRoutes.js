@@ -5,12 +5,19 @@ const fs = require("fs/promises");
 const sharp = require("sharp"); // Add sharp for image processing
 const getUser = require("../middleware/getUser");
 const { getProfile, updateProfile } = require("../controllers/user/profile");
+const { searchUsers, getFriends, getFriendRequests, sendFriendRequest, updateFriendRequest } = require("../controllers/user/friend");
 const User = require("../models/User");
 const logger = require("../util/logger");
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 50,
+});
+
+// More strict rate limiter for friend requests to prevent spam
+const friendRequestLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 20,
 });
 
 // Image processing configuration
@@ -83,8 +90,16 @@ const uploadAvatar = async (req, res) => {
     }
 };
 
+// Profile routes
 router.get("/profile", limiter, getUser, getProfile);
 router.put("/profile", limiter, getUser, updateProfile);
 router.post("/avatar", limiter, getUser, uploadAvatar);
+
+// Friend system routes
+router.get("/search", limiter, getUser, searchUsers);
+router.get("/friends", limiter, getUser, getFriends);
+router.get("/friends/requests", limiter, getUser, getFriendRequests);
+router.post("/friends/requests", friendRequestLimiter, getUser, sendFriendRequest);
+router.put("/friends/requests/:requestId", limiter, getUser, updateFriendRequest);
 
 module.exports = router;

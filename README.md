@@ -4,7 +4,7 @@
 
 | Term    | Completed |
 |---------|-----------|
-| MVC     |           |
+| MVC     |     X     |
 
 ## **Backend Development**
 
@@ -12,50 +12,50 @@
 
 | Term       | Completed |
 |------------|-----------|
-| DOTENV     |           |
-| MIDDLEWARE |           |
-| VALIDATOR  |           |
+| DOTENV     |     X     |
+| MIDDLEWARE |     X     |
+| VALIDATOR  |     X     |
 
 ### **Backend Development - Data Handling**
 
 | Term       | Completed |
 |------------|-----------|
-| MONGODB    |           |
-| CRUD       |           |
-| FILEUPLOAD |           |
+| MONGODB    |     X     |
+| CRUD       |     X     |
+| FILEUPLOAD |     X     |
 
 ### **Backend Development - Security & Authentication**
 
 | Term         | Completed |
 |--------------|-----------|
-| JWT          |           |
-| COOKIES      |           |
-| HELMET       |           |
-| ARGON2       |           |
-| 0AUTH        |           |
+| JWT          |     X     |
+| COOKIES      |     X     |
+| HELMET       |     X     |
+| ARGON2       |     X     |
+| 0AUTH        |     X     |
 
 ### **Backend Development - Communication**
 
 | Term         | Completed |
 |--------------|-----------|
-| WEBSOCKETS   |           |
-| NODEMAILER   |           |
-| CORS         |           |
-| RATE LIMITER |           |
+| WEBSOCKETS   |     X     |
+| NODEMAILER   |     ?     |
+| CORS         |     X     |
+| RATE LIMITER |     X     |
 
 ## **Frontend Development**
 
 | Term        | Completed |
 |-------------|-----------|
-| REACT       |           |
-| AXIOS/FETCH |           |
+| REACT       |     X     |
+| AXIOS/FETCH |     X     |
 
 ## **API Development & Testing**
 
 | Term    | Completed |
 |---------|-----------|
-| OPENAPI |           |
-| POSTMAN |           |
+| OPENAPI |     X     |
+| POSTMAN |     X     |
 
 ## **DevOps & Deployment**
 
@@ -68,4 +68,4 @@
 
 | Term | Completed |
 |------|-----------|
-| JEST |           |
+| JEST |     X     |

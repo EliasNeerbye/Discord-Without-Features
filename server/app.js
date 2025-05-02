@@ -12,6 +12,8 @@ const openapi = require('./util/openapi');
 const logger = require("./util/logger");
 const config = require("./util/config");
 
+console.log(config)
+
 const app = express();
 const server = http.createServer(app);
 
